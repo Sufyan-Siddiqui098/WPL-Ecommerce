@@ -115,10 +115,20 @@ export const updateUserController = async (req, res) => {
     const user = await User.findById(req.user._id);
 
     // if the email or phone found but for another user
-    if (existingUser && existingUser._id.toString() !== req.user._id.toString()) {
+    if (
+      existingUser &&
+      existingUser._id.toString() !== req.user._id.toString()
+    ) {
       return res.status(409).send({
         success: false,
-        message: "This phone number is already registered"
+        message: "This phone number is already registered",
+      });
+    }
+    // if user is not present.
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found!",
       });
     }
 
@@ -130,7 +140,7 @@ export const updateUserController = async (req, res) => {
     const updatedUser = (await user.save()).toObject();
     delete updatedUser.password;
 
-    console.log("updated user ", updatedUser);
+    // console.log("updated user ", updatedUser);
 
     res.status(200).send({
       success: true,
@@ -155,7 +165,83 @@ export const updateUserController = async (req, res) => {
   }
 };
 
+export const updatePassword = async (req, res) => {
+  try {
+    const { passowrd, newPassword, confirmNewPassword } = req.body;
+    const user = await User.findById(req.user._id);
 
-export const updatePassword = async() => {
-    
-}
+    // if user is not present.
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found!",
+      });
+    }
+    // compare the hash password and password.
+    if (!(await comparePassword(passowrd, user.password))) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid user passowrd!",
+      });
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      return res.status(400).send({
+        success: false,
+        message: "New password & confirm password should be same!",
+      });
+    }
+
+    user.password = await createHashPassword(newPassword);
+
+    await user.save();
+
+    res.status(200).send({
+      success: true,
+      message: "Password changed successfully !",
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: error.message
+        ? error.message
+        : "Something went wrong while changing password",
+      error,
+    });
+  }
+};
+
+// Get user by Id
+export const getUserController = async (req, res) => {
+  const { userId } = req.params;
+  const user = User.findById(userId);
+
+  if (!user) {
+    return res.status(404).send({
+      success: false,
+      message: "User not found ",
+    });
+  }
+
+  if (
+    req.user.role !== "ADMIN" ||
+    user._id.toString() !== req.user._id.toString()
+  ) {
+    return res.status(409).send({
+      success: false,
+      message: "You're not authorized",
+    });
+  }
+
+  res.status(200).send({
+    success: true,
+    message: "User fetched Successfully",
+    user: {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+    },
+  });
+};
