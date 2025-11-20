@@ -2,6 +2,7 @@ import { comparePassword, createHashPassword } from "../helper/authHelper.js";
 import User from "../model/User.model.js";
 import jwt from "jsonwebtoken";
 
+// Create User
 export const signupController = async (req, res) => {
   try {
     const { firstName, lastName, email, password, phone, role } = req.body;
@@ -58,6 +59,7 @@ export const signupController = async (req, res) => {
   }
 };
 
+// Login User
 export const loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -109,28 +111,30 @@ export const loginController = async (req, res) => {
   }
 };
 
+// Update user
 export const updateUserController = async (req, res) => {
   try {
     const { firstName, lastName, phone } = req.body;
-    const existingUser = await User.findOne({ phone });
     const user = await User.findById(req.user._id);
 
-    // if the email or phone found but for another user
-    if (
-      existingUser &&
-      existingUser._id.toString() !== req.user._id.toString()
-    ) {
-      return res.status(409).send({
-        success: false,
-        message: "This phone number is already registered",
-      });
-    }
     // if user is not present.
     if (!user) {
       return res.status(404).send({
         success: false,
         message: "User not found!",
       });
+    }
+
+    // If phone and phone number is change
+    if (phone && phone !== user.phone) {
+      const existingUser = await User.findOne({ phone });
+      // If new phoen is already registereted with another user.
+      if (existingUser && existingUser._id.toString() !== user._id.toString()) {
+        return res.status(409).json({
+          success: false,
+          message: "This phone number is already registered",
+        });
+      }
     }
 
     // updating - already validated fields
@@ -140,8 +144,6 @@ export const updateUserController = async (req, res) => {
 
     const updatedUser = (await user.save()).toObject();
     delete updatedUser.password;
-
-    // console.log("updated user ", updatedUser);
 
     res.status(200).send({
       success: true,
@@ -166,9 +168,11 @@ export const updateUserController = async (req, res) => {
   }
 };
 
-export const updatePassword = async (req, res) => {
+// Update Password
+export const updateUserPassword = async (req, res) => {
   try {
-    const { passowrd, newPassword, confirmNewPassword } = req.body;
+    const { password, newPassword, confirmNewPassword } = req.body;
+
     const user = await User.findById(req.user._id);
 
     // if user is not present.
@@ -179,7 +183,7 @@ export const updatePassword = async (req, res) => {
       });
     }
     // compare the hash password and password.
-    if (!(await comparePassword(passowrd, user.password))) {
+    if (!(await comparePassword(password, user.password))) {
       return res.status(400).send({
         success: false,
         message: "Invalid user passowrd!",
@@ -223,7 +227,6 @@ export const getUserByIdController = async (req, res) => {
       message: "User not found ",
     });
   }
-
 
   if (
     req.user.role !== "ADMIN" &&
