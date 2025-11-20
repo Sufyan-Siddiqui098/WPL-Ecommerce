@@ -89,6 +89,7 @@ export const loginController = async (req, res) => {
       success: true,
       message: "Login Successfully",
       user: {
+        _id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
@@ -212,9 +213,9 @@ export const updatePassword = async (req, res) => {
 };
 
 // Get user by Id
-export const getUserController = async (req, res) => {
+export const getUserByIdController = async (req, res) => {
   const { userId } = req.params;
-  const user = User.findById(userId);
+  const user = await User.findById(userId);
 
   if (!user) {
     return res.status(404).send({
@@ -223,8 +224,9 @@ export const getUserController = async (req, res) => {
     });
   }
 
+
   if (
-    req.user.role !== "ADMIN" ||
+    req.user.role !== "ADMIN" &&
     user._id.toString() !== req.user._id.toString()
   ) {
     return res.status(409).send({
