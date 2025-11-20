@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import userRoutes from "./routes/user.route.js";
+import categoryRoute from "./routes/category.route.js";
 import mongoose from 'mongoose';
 
 
@@ -15,6 +16,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/auth", userRoutes);
+app.use("/api/category", categoryRoute)
 
 app.listen(PORT, async() => {
     try{
