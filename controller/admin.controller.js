@@ -2,10 +2,9 @@ import { createHashPassword } from "../helper/authHelper.js";
 import Categories from "../model/categories.model.js";
 import User from "../model/User.model.js";
 
-
-// ------------------- Categories------------------
-// --- Create
-export const createCategoryController = async (req, res) => {
+// ------------------------------- Categories -------------------------------s
+// Create
+export const adminCreateCategoryController = async (req, res) => {
   try {
     const { name } = req.body;
     const existingCategory = await Categories.findOne({ name });
@@ -47,7 +46,7 @@ export const createCategoryController = async (req, res) => {
   }
 };
 // Update (by Admin)
-export const updateCategoryById = async (req, res) => {
+export const adminUpdateCategoryById = async (req, res) => {
   try {
     const { name } = req.body;
     const { cid } = req.params;
@@ -101,7 +100,7 @@ export const updateCategoryById = async (req, res) => {
 };
 
 // Delete (By Admin)
-export const deleteCategoryById = async (req, res) => {
+export const adminDeleteCategoryById = async (req, res) => {
   try {
     const { cid } = req.params;
 
@@ -130,22 +129,21 @@ export const deleteCategoryById = async (req, res) => {
   }
 };
 
-
-// ------------------ USER  ------------------
+// ------------------------------- USER  -------------------------------
 // Update Password (By Admin)
-export const adminUpdateUserPassword = async (req, res) => {
+export const adminUpdateUserPasswordById = async (req, res) => {
   try {
     const { newPassword, confirmNewPassword } = req.body;
-    const {userId} = req.params;
+    const { userId } = req.params;
 
     // Validation
-    if ( !newPassword || !confirmNewPassword) {
+    if (!newPassword || !confirmNewPassword) {
       return res.status(400).json({
         success: false,
         message: "All fields are required [new-password, confirm-password]",
       });
     }
-    if(!userId){
+    if (!userId) {
       return res.status(400).json({
         success: false,
         message: "User id is required in url parameter.",
@@ -175,7 +173,7 @@ export const adminUpdateUserPassword = async (req, res) => {
       });
     }
 
-    // Hash the password. 
+    // Hash the password.
     user.password = await createHashPassword(newPassword);
     await user.save();
 
@@ -183,23 +181,23 @@ export const adminUpdateUserPassword = async (req, res) => {
       success: true,
       message: "User password updated successfully by admin",
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message || "Something went while updating password (By Admin) wrong",
+      message:
+        error.message ||
+        "Something went while updating password (By Admin) wrong",
       error,
     });
   }
 };
 
 // Admin updates any user info
-export const adminUpdateUserController = async (req, res) => {
+export const adminUpdateUserInfoControllerById = async (req, res) => {
   try {
     const { firstName, lastName, phone } = req.body;
     const { userId } = req.params; // user to be updated
 
-    
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -227,7 +225,6 @@ export const adminUpdateUserController = async (req, res) => {
     const updatedUser = (await user.save()).toObject();
     delete updatedUser.password;
 
-   
     res.status(200).json({
       success: true,
       message: "User updated successfully by admin!",
@@ -244,6 +241,33 @@ export const adminUpdateUserController = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || "Something went wrong while updating user",
+      error,
+    });
+  }
+};
+
+export const adminDeleteUserControllerById = async (req, res) => {
+  try {
+    const { userId } = req.params; // user to be updated
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found!",
+      });
+    }
+
+    await User.findByIdAndDelete(userId);
+
+    return res.status(200).json({
+      success: true,
+      message: `User ${user.name} deleted successfully`,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong while deleting user",
       error,
     });
   }

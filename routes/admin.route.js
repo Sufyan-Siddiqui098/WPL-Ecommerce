@@ -2,10 +2,12 @@ import express from "express";
 import multer from "multer";
 import { isAdmin, isLogin } from "../middleware/authCheck.js";
 import {
-    adminUpdateUserPassword,
-  createCategoryController,
-  deleteCategoryById,
-  updateCategoryById,
+  adminCreateCategoryController,
+  adminDeleteCategoryById,
+  adminDeleteUserControllerById,
+  adminUpdateCategoryById,
+  adminUpdateUserInfoControllerById,
+  adminUpdateUserPasswordById,
 } from "../controller/admin.controller.js";
 
 const upload = multer();
@@ -15,26 +17,47 @@ const router = express.Router();
 // --------------- Categories ---------------
 // create category
 router.post(
-  "/create",
+  "/create-category",
   isLogin,
   isAdmin,
   upload.single("photo"),
-  createCategoryController
+  adminCreateCategoryController
 );
 // update by id (By Admin)
 router.put(
-  "/update/:cid",
+  "/update-category/:cid",
   isLogin,
   isAdmin,
   upload.single("photo"),
-  updateCategoryById
+  adminUpdateCategoryById
 );
 // Delete by id (By Admin)
-router.delete("/delete/:cid", isLogin, isAdmin, deleteCategoryById);
+router.delete(
+  "/delete-category/:cid",
+  isLogin,
+  isAdmin,
+  adminDeleteCategoryById
+);
 
-
-// ------------- User
+// ------------- User -------------
 // Update password (By admin)
-router.put("/update-passowrd/:userId", isLogin, isAdmin, adminUpdateUserPassword);
+router.put(
+  "/update-user-passowrd/:userId",
+  isLogin,
+  isAdmin,
+  adminUpdateUserPasswordById
+);
+router.put(
+  "update-user-info/:userId",
+  isLogin,
+  isAdmin,
+  adminUpdateUserInfoControllerById
+);
+router.delete(
+  "delete-user/:userId",
+  isLogin,
+  isAdmin,
+  adminDeleteUserControllerById
+);
 
 export default router;
