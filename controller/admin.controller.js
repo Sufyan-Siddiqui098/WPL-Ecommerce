@@ -195,7 +195,7 @@ export const adminUpdateUserPasswordById = async (req, res) => {
 // Admin updates any user info & role
 export const adminUpdateUserInfoControllerById = async (req, res) => {
   try {
-    const { firstName, lastName, phone, role } = req.body;
+    const { firstName, lastName, phone, role, email } = req.body;
     const { userId } = req.params; // user to be updated
 
     const user = await User.findById(userId);
@@ -216,6 +216,15 @@ export const adminUpdateUserInfoControllerById = async (req, res) => {
         });
       }
     }
+    if(email && email !== user.email){
+      const existingUserWithEmail = await User.findOne({ email });
+      if (existingUserWithEmail && existingUserWithEmail._id.toString() !== user._id.toString()) {
+        return res.status(409).json({
+          success: false,
+          message: "This email is already registered",
+        });
+      }
+    }
     
 
     //  Update only provided fields
@@ -223,6 +232,7 @@ export const adminUpdateUserInfoControllerById = async (req, res) => {
     if (lastName) user.lastName = lastName;
     if (phone) user.phone = phone;
     if(role) user.role = role.trim().toUpperCase();
+    if(email) user.email = email;
 
     const updatedUser = (await user.save()).toObject();
     delete updatedUser.password;
@@ -264,7 +274,7 @@ export const adminDeleteUserControllerById = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: `User ${user.name} deleted successfully`,
+      message: `User ${user.firstName} deleted successfully`,
     });
   } catch (error) {
     res.status(500).json({
@@ -285,7 +295,7 @@ export const adminGetAllUsersController = async (req, res) => {
       });
     }
 
-    const filteredUser = users.filter((user)=> {
+    const filteredUser = users.map((user)=> {
       return {
         _id: user._id, 
         firstName: user.firstName,
@@ -299,7 +309,7 @@ export const adminGetAllUsersController = async (req, res) => {
     res.status(200).send({
       success: true,
       message: "Users fetched successfully !",
-      filteredUser,
+      users: [...filteredUser],
     });
   } catch (error) {
      res.status(500).json({
