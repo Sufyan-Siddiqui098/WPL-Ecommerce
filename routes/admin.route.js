@@ -49,7 +49,7 @@ router.put(
   adminUpdateUserPasswordById
 );
 router.put(
-  "/update-user-info/:userId",
+  "/update-user/:userId",
   isLogin,
   isAdmin,
   adminUpdateUserInfoControllerById
