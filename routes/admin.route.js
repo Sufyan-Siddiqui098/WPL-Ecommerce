@@ -5,6 +5,7 @@ import {
   adminCreateCategoryController,
   adminDeleteCategoryById,
   adminDeleteUserControllerById,
+  adminGetAllUsersController,
   adminUpdateCategoryById,
   adminUpdateUserInfoControllerById,
   adminUpdateUserPasswordById,
@@ -58,6 +59,12 @@ router.delete(
   isLogin,
   isAdmin,
   adminDeleteUserControllerById
+);
+router.get(
+  "get-all-users",
+  isLogin,
+  isAdmin,
+  adminGetAllUsersController
 );
 
 export default router;
