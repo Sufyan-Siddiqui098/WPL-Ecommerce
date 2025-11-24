@@ -37,7 +37,7 @@ export const getAllCategories = async (req, res) => {
     if (!categories || categories?.length < 1) {
       return res.status(400).send({
         success: false,
-        message: "Categories not found",
+        message: "No Category found",
       });
     }
 
