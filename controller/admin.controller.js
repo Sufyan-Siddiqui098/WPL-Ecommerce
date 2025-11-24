@@ -192,10 +192,10 @@ export const adminUpdateUserPasswordById = async (req, res) => {
   }
 };
 
-// Admin updates any user info
+// Admin updates any user info & role
 export const adminUpdateUserInfoControllerById = async (req, res) => {
   try {
-    const { firstName, lastName, phone } = req.body;
+    const { firstName, lastName, phone, role } = req.body;
     const { userId } = req.params; // user to be updated
 
     const user = await User.findById(userId);
@@ -216,11 +216,13 @@ export const adminUpdateUserInfoControllerById = async (req, res) => {
         });
       }
     }
+    
 
     //  Update only provided fields
     if (firstName) user.firstName = firstName;
     if (lastName) user.lastName = lastName;
     if (phone) user.phone = phone;
+    if(role) user.role = role.trim().toUpperCase();
 
     const updatedUser = (await user.save()).toObject();
     delete updatedUser.password;
@@ -245,7 +247,7 @@ export const adminUpdateUserInfoControllerById = async (req, res) => {
     });
   }
 };
-
+// Admin Delete User 
 export const adminDeleteUserControllerById = async (req, res) => {
   try {
     const { userId } = req.params; // user to be updated
@@ -272,3 +274,38 @@ export const adminDeleteUserControllerById = async (req, res) => {
     });
   }
 };
+// Admin Get All User
+export const adminGetAllUsersController = async (req, res) => {
+  try {
+    const users = await User.find({});
+    if(!users || users.length < 1){
+      return res.status(400).send({
+        success: false,
+        message: "No user found",
+      });
+    }
+
+    const filteredUser = users.filter((user)=> {
+      return {
+        _id: user._id, 
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        role: user.role
+      };
+    })
+
+    res.status(200).send({
+      success: true,
+      message: "Users fetched successfully !",
+      filteredUser,
+    });
+  } catch (error) {
+     res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong while fetching users",
+      error,
+    });
+  }
+}
