@@ -49,19 +49,19 @@ router.put(
   adminUpdateUserPasswordById
 );
 router.put(
-  "update-user-info/:userId",
+  "/update-user-info/:userId",
   isLogin,
   isAdmin,
   adminUpdateUserInfoControllerById
 );
 router.delete(
-  "delete-user/:userId",
+  "/delete-user/:userId",
   isLogin,
   isAdmin,
   adminDeleteUserControllerById
 );
 router.get(
-  "get-all-users",
+  "/get-all-users",
   isLogin,
   isAdmin,
   adminGetAllUsersController
