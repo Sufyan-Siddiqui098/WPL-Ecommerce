@@ -42,3 +42,24 @@ export const isAdmin = async (req, res, next) => {
     });
   }
 };
+
+// Seller access
+export const isSeller = async (req, res, next) => {
+  try {
+    if (req.user.role !== "SELLER") {
+      return res.status(401).send({
+        success: false,
+        message: "UnAuthorized Access - Seller only",
+      });
+    } else {
+      next();
+    }
+  } catch (err) {
+    res.status(400).send({
+      success: false,
+      message: "Error in seller middleware",
+      error: err,
+    });
+  }
+};
+

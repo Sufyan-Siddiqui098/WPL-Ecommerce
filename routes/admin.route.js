@@ -4,6 +4,7 @@ import { isAdmin, isLogin } from "../middleware/authCheck.js";
 import {
   adminCreateCategoryController,
   adminDeleteCategoryById,
+  adminDeleteProductController,
   adminDeleteUserControllerById,
   adminGetAllUsersController,
   adminUpdateCategoryById,
@@ -66,5 +67,9 @@ router.get(
   isAdmin,
   adminGetAllUsersController
 );
+
+// ------------- Products -------------
+// Delete product (By Admin)
+router.delete("/delete-product/:pid", isLogin, isAdmin, adminDeleteProductController);
 
 export default router;

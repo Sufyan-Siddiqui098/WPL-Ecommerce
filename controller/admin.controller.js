@@ -319,3 +319,33 @@ export const adminGetAllUsersController = async (req, res) => {
     });
   }
 }
+
+// Admin Delete Product
+export const adminDeleteProductController = async (req, res) => {
+  try {
+    const { pid } = req.params;
+
+    const product = await Product.findById(pid);
+    if (!product) {
+      return res.status(404).send({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    await Product.findByIdAndDelete(pid);
+
+    res.status(200).send({
+      success: true,
+      message: `Product ${product.name} deleted successfully by admin`,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: error.message
+        ? error.message
+        : "Something went wrong while deleting product",
+      error,
+    });
+  }
+};

@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import userRoutes from "./routes/user.route.js";
 import categoryRoute from "./routes/category.route.js";
 import adminRoute from "./routes/admin.route.js";
+import productRoute from "./routes/product.route.js";
 import mongoose from "mongoose";
 
 // Environment Variable Configured.
@@ -17,6 +18,7 @@ app.use(express.json());
 
 app.use("/api/auth", userRoutes);
 app.use("/api/category", categoryRoute);
+app.use("/api/product", productRoute);
 // Admin specific
 app.use("/api/admin", adminRoute);
 
