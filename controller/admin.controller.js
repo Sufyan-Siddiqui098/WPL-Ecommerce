@@ -1,5 +1,6 @@
 import { createHashPassword } from "../helper/authHelper.js";
 import Categories from "../model/categories.model.js";
+import Product from "../model/product.model.js";
 import User from "../model/User.model.js";
 
 // ------------------------------- Categories -------------------------------s
@@ -320,6 +321,7 @@ export const adminGetAllUsersController = async (req, res) => {
   }
 }
 
+// ------------------------------- PRODUCT  -------------------------------
 // Admin Delete Product
 export const adminDeleteProductController = async (req, res) => {
   try {
