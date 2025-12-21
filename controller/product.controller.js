@@ -4,7 +4,7 @@ import Categories from "../model/categories.model.js";
 // Create Product (Seller only)
 export const createProductController = async (req, res) => {
   try {
-    const { name, description, price, category } = req.body;
+    const { name, description, price, category, availableStock } = req.body;
 
     // Check if category exists
     const existingCategory = await Categories.findById(category);
@@ -34,6 +34,7 @@ export const createProductController = async (req, res) => {
         contentType: req.file.mimetype,
       },
       seller: req.user._id,
+      availableStock
     });
 
     res.status(201).send({
@@ -46,6 +47,7 @@ export const createProductController = async (req, res) => {
         price: product.price,
         category: product.category,
         seller: product.seller,
+        availableStock: product.availableStock,
         createdAt: product.createdAt,
       },
     });
@@ -64,7 +66,7 @@ export const createProductController = async (req, res) => {
 export const updateProductController = async (req, res) => {
   try {
     const { pid } = req.params;
-    const { name, description, price, category } = req.body;
+    const { name, description, price, category, availableStock } = req.body;
 
     // Check if product exists
     const product = await Product.findById(pid);
@@ -99,6 +101,7 @@ export const updateProductController = async (req, res) => {
     if (name) product.name = name;
     if (description) product.description = description;
     if (price) product.price = price;
+    if(availableStock) product.availableStock = availableStock;
 
     // Update photo
     if (req.file) {
@@ -120,6 +123,7 @@ export const updateProductController = async (req, res) => {
         price: product.price,
         category: product.category,
         seller: product.seller,
+        availableStock: product.availableStock,
         updatedAt: product.updatedAt,
       },
     });
