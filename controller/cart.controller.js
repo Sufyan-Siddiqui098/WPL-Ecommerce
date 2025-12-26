@@ -158,8 +158,6 @@ export const addToCartController = async (req, res) => {
 export const removeFromCartController = async (req, res) => {
   try {
     const { productId } = req.params;
-    const { quantity } = req.body; // Optional: if not provided, remove entire item
-
     // Find user's cart
     const cart = await Cart.findOne({ user: req.user._id });
 
@@ -188,7 +186,7 @@ export const removeFromCartController = async (req, res) => {
     const product = await Product.findById(productId);
 
     if (!product) {
-      // Product was deleted, just remove from cart
+      // Product was deleted, remove from cart
       cart.items.splice(itemIndex, 1);
       await cart.save();
       return res.status(200).send({
@@ -199,15 +197,10 @@ export const removeFromCartController = async (req, res) => {
 
     let quantityToRestore;
 
-    if (quantity && quantity < cartItem.quantity) {
-      // Reduce quantity
-      quantityToRestore = quantity;
-      cart.items[itemIndex].quantity -= quantity;
-    } else {
       // Remove entire item
-      quantityToRestore = cartItem.quantity;
-      cart.items.splice(itemIndex, 1);
-    }
+    quantityToRestore = cartItem.quantity;
+    cart.items.splice(itemIndex, 1);
+    
 
     // Restore product stock
     product.availableStock += quantityToRestore;
