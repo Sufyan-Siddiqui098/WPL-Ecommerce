@@ -96,14 +96,6 @@ export const addToCartController = async (req, res) => {
       // Product already in cart, update quantity
       const newQuantity = cart.items[existingItemIndex].quantity + quantity;
 
-      // Check if total quantity exceeds available stock
-      if (newQuantity > product.availableStock) {
-        return res.status(400).send({
-          success: false,
-          message: `Cannot add more items. Only ${product.availableStock} additional items available`,
-        });
-      }
-
       cart.items[existingItemIndex].quantity = newQuantity;
       cart.items[existingItemIndex].priceAtAddition = product.price;
     } else {
