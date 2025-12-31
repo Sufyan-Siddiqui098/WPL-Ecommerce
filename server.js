@@ -6,6 +6,7 @@ import categoryRoute from "./routes/category.route.js";
 import adminRoute from "./routes/admin.route.js";
 import productRoute from "./routes/product.route.js";
 import cartRoute from "./routes/cart.route.js";
+import orderRoute from "./routes/order.route.js";
 import mongoose from "mongoose";
 
 // Environment Variable Configured.
@@ -21,6 +22,7 @@ app.use("/api/auth", userRoutes);
 app.use("/api/category", categoryRoute);
 app.use("/api/product", productRoute);
 app.use("/api/cart", cartRoute);
+app.use("/api/order", orderRoute);
 // Admin specific
 app.use("/api/admin", adminRoute);
 
