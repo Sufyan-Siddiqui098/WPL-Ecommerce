@@ -1,4 +1,5 @@
 import { createHashPassword } from "../helper/authHelper.js";
+import { logger } from "../helper/logger.js";
 import Categories from "../model/categories.model.js";
 import Product from "../model/product.model.js";
 import User from "../model/User.model.js";
@@ -15,20 +16,23 @@ export const adminCreateCategoryController = async (req, res) => {
         message: "Category already exist",
       });
     }
-    // if no photo
-    if (!req.file) {
-      return res.status(400).json({ message: "Photo is required" });
-    }
+    
 
     // create document
     const category = await Categories.create({
       name: name,
-      photo: {
-        data: req.file.buffer,
-        contentType: req.file.mimetype,
-      },
     });
 
+    // if photo is provided
+    if(req.file){
+      logger.info(`Photo provided for category ${name}, saving photo data.`);
+      category.photo = {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+      };
+    }
+
+    logger.info(`Saving category ${name} to database.`);
     await category.save();
 
     res.status(200).send({
@@ -107,19 +111,43 @@ export const adminDeleteCategoryById = async (req, res) => {
 
     const category = await Categories.findById(cid);
     if (!category) {
+      logger.error(`Category with id ${cid} not found`);
       return res.status(409).send({
         success: false,
         message: "Category not found",
       });
     }
 
-    await Categories.findByIdAndDelete(cid);
+    const productsWithCategory = await Product.find({ category: cid });
 
+    if (productsWithCategory.length > 0) {
+      // logger.error(`Cannot delete category with id ${cid} because it is associated with products`);
+      logger.warn(`Category with id ${cid} is associated with products. Setting category to null and isActive to false for these products.`);
+      let unknownCategory = await Categories.findOne({ name: "Unknown" });
+      // creating new Unknown category if not exists
+      if (!unknownCategory) {
+        logger.info(`Unknown category not found. Creating a new Unknown category.`);
+        unknownCategory = new Categories({ name: "Unknown" });
+        await unknownCategory.save();
+        logger.info(`Unknown category created with id ${unknownCategory._id}`);
+      }
+
+      await Product.updateMany(
+        { category: cid },
+        { $set: { category:  unknownCategory._id } }
+      );
+      
+      logger.info(`Products associated with category id ${cid} updated to Unknown category and set to inactive.`);
+    }
+
+    await Categories.findByIdAndDelete(cid);
+    logger.info(`Category with id ${cid} deleted successfully`);
     return res.status(200).json({
       success: true,
       message: `Category ${category.name} deleted successfully`,
     });
   } catch (error) {
+    logger.error(`Error while deleting category with id ${cid}: ${error.message}`);
     res.status(500).send({
       success: false,
       message: error.message
